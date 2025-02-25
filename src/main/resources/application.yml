@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: poc-netty
+logging:
+  level:
+    root: INFO
+    com.pocnetty.infrastructure.handlers: DEBUG
+
