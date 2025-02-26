@@ -6,6 +6,7 @@ import com.pocnetty.domain.enums.OrderType;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -72,39 +73,25 @@ public class MatchingEngine {
      * @return an ExecutionReport indicating FILLED or REJECTED status
      */
     private ExecutionReport matchOrder(MarketOrder marketOrder, PriorityBlockingQueue<LimitOrder> orderQueue) {
-        List<LimitOrder> skippedOrders = new ArrayList<>();
-        ExecutionReport report = null;
-
-        while (!orderQueue.isEmpty()) {
-            LimitOrder currentOrder = orderQueue.poll();
+        for (Iterator<LimitOrder> iterator = orderQueue.iterator(); iterator.hasNext();) {
+            LimitOrder currentOrder = iterator.next();
             if (currentOrder.getQuantity() == marketOrder.getQuantity()) {
-                report = new ExecutionReport(
+                iterator.remove();
+                return new ExecutionReport(
                         marketOrder.getQuantity(),
                         currentOrder.getPrice(),
                         marketOrder.getQuantity(),
                         marketOrder.getAccountId(),
                         "FILLED"
                 );
-                break;
-            } else {
-                skippedOrders.add(currentOrder);
             }
         }
-
-        if (!skippedOrders.isEmpty()) {
-            orderQueue.addAll(skippedOrders);
-        }
-
-        if (report == null) {
-            report = new ExecutionReport(
-                    marketOrder.getQuantity(),
-                    null,
-                    null,
-                    marketOrder.getAccountId(),
-                    "REJECTED"
-            );
-        }
-
-        return report;
+        return new ExecutionReport(
+                marketOrder.getQuantity(),
+                null,
+                null,
+                marketOrder.getAccountId(),
+                "REJECTED"
+        );
     }
 }
